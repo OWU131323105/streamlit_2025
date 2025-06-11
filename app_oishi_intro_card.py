@@ -95,8 +95,23 @@ if submitted:
         })
         st.success("推し紹介カードが作成されました！")
 
+# 検索機能
+st.markdown("---")
+st.subheader("カード検索")
+search_name = st.text_input("名前で検索", placeholder="例: 山田 太郎")
+search_category = st.selectbox("カテゴリで検索", ["すべて"] + [
+    "アイドル", "俳優", "声優", "アーティスト", "その他"
+])
+
+# 検索結果をフィルタリング
+filtered_cards = [
+    card for card in st.session_state.cards
+    if (not search_name or search_name in card["name"]) and
+       (search_category == "すべて" or search_category == card["category"])
+]
+
 # 保存されたカードを順番に表示
-for index, card in enumerate(st.session_state.cards):
+for index, card in enumerate(filtered_cards):
     if st.session_state.edit_index == index:
         # 編集フォームを表示
         with st.form(f"edit_form_{index}"):
@@ -133,7 +148,7 @@ for index, card in enumerate(st.session_state.cards):
             st.session_state.cards[index] = {
                 "name": name,
                 "nickname": nickname,
-                "category": category,
+                "category": custom_category if selected_category == "その他" else selected_category,  # 修正箇所
                 "hobbies": hobbies,
                 "memories": memories,
                 "icon_image": card["icon_image"],  # 画像は変更不可
@@ -207,10 +222,10 @@ for index, card in enumerate(st.session_state.cards):
                 st.write(f"**⏳ 推し始めた日**: {card['start_date'].strftime('%Y-%m-%d')}（{days}日目）")
 
             if card["hobbies"]:
-                st.write(f"**💖 推しの魅力**: {card['hobbies']}")
+                st.write(f"**💖 推しの魅力**: {card["hobbies"]}")
             
             if card["memories"]:
-                st.write(f"**📖 推しとの思い出**: {card['memories']}")
+                st.write(f"**📖 推しとの思い出**: {card["memories"]}")
             
             sns_list = []
             if card.get("twitter"):
